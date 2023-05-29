@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b593e1a7-6539-4933-a9f5-7a66dd2ce399" >
+		<http:listener-connection host="localhost" port="8080" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="4619e4ec-87c6-456c-918e-159e6c5a9d66" >
+		<http:request-connection host="training4-american-ws.cloudhub.io" port="80" />
+	</http:request-config>
+	<flow name="uday-practiceFlow" doc:id="a9e39d2d-ec50-4c4d-b943-f42b7b3a2ff0" >
+		<http:listener doc:name="Listener" doc:id="9f6567cb-dc5c-474c-bf5c-95555129b845" config-ref="HTTP_Listener_config" path="/practice"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c87e70de-aa80-408d-a26b-26e89dfb9ef1" message="start of the flow"/>
+		<set-variable value="#[attributes.queryParams.username]" doc:name="Username" doc:id="d1a18921-b2b0-4d40-a24b-5c35d81d703d" variableName="username"/>
+		<set-variable value="#[attributes.queryParams.password]" doc:name="password" doc:id="2caf98bc-6454-487f-a3b9-ef6dba7156d1" variableName="password"/>
+		<flow-ref doc:name="Flow Reference" doc:id="60d4147d-5a24-49ec-8aca-02011175f1f9" name="uday-practiceSub_Flow"/>
+		<set-payload value='#[vars.username ++" " ++"welcomes to mulesoft"]' doc:name="Set Payload" doc:id="aeb66ee3-6f5c-4bda-a8a1-67948dc74a3d" />
+	</flow>
+	<sub-flow name="uday-practiceSub_Flow" doc:id="3ca1cb43-0c16-42e8-af52-bfe612f952fc" >
+		<http:request method="GET" doc:name="Request" doc:id="45336425-ce6e-4050-a189-cf735af0fd87" config-ref="HTTP_Request_configuration" path="/api/flights"/>
+		<ee:transform doc:name="Transform Message" doc:id="8b9de7c1-8370-4824-9d5f-fbb1c0bcd66e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="203b15a1-fb0e-4e54-980d-6e540c65662c" name="uday-practiceFlow1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d71eda42-9cde-42a2-854e-05392a228fd2" message="#[payload]"/>
+	</sub-flow>
+	<flow name="uday-practiceFlow1" doc:id="b4aa6a59-44bf-4325-8c49-d97766c14e31" >
+		<logger level="INFO" doc:name="Logger" doc:id="e3dd32e7-b14b-47cd-a640-ad35021c603e" message="START OF THE PRIVATE FLOW"/>
+		<set-payload value='#["checking sub flow request"]' doc:name="Set Payload" doc:id="38a4ba2c-1182-44ce-91b9-1c20fd966c36" />
+	</flow>
+</mule>
